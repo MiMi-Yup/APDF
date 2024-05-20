@@ -30,6 +30,8 @@ jobs:
     needs: build
     runs-on: windows-latest
     steps:
+    - name: Dir
+      run: dir
     - name: Publish Self-contained Application
       run: dotnet publish APDF.csproj -c Release -r win-x64 --self-contained
     - name: Zip Publish Folder
