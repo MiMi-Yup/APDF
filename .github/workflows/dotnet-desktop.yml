@@ -70,6 +70,10 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -o ./publish
       
+    - name: Zip Publish Folder
+      run: |
+        mkdir zip
+        Compress-Archive -Path ./publish -DestinationPath APDF.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -80,4 +84,12 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-        files: ./publish/*
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: APDF.zip
+        asset_name: APDF.zip
+        asset_content_type: application/zip
