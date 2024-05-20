@@ -71,9 +71,7 @@ jobs:
       run: dotnet publish --configuration Release --self-contained -o ./publish
       
     - name: Zip Publish Folder
-      run: |
-        mkdir zip
-        Compress-Archive -Path ./publish -DestinationPath APDF.zip
+      run: Compress-Archive -Path ./publish -DestinationPath APDF.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
