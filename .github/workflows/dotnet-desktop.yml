@@ -67,11 +67,19 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release
       
+  publish:
+    needs: build
+    runs-on: windows-latest
+    steps:
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -o ./publish
-      
     - name: Zip Publish Folder
       run: Compress-Archive -Path ./publish -DestinationPath APDF.zip
+      
+  release:
+    needs: publish
+    runs-on: windows-latest
+    steps:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
