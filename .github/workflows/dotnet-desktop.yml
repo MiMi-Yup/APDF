@@ -62,13 +62,13 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       
     - name: Restore dependencies
-      run: dotnet restore APDF.csproj
+      run: dotnet restore
       
     - name: Build
-      run: dotnet build --configuration Release APDF.csproj
+      run: dotnet build --configuration Release
       
     - name: Publish
-      run: dotnet publish --configuration Release --self-contained false APDF.csproj
+      run: dotnet publish --configuration Release --self-contained -o ./publish
       
     - name: Create Release
       id: create_release
