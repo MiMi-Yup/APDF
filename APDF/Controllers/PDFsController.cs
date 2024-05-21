@@ -1,5 +1,5 @@
 ﻿using APDF.Core.Implements;
-using APDF.DTOs.Requests;
+using APDF.DTOs.Requests.PDF;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APDF.Controllers
@@ -16,14 +16,33 @@ namespace APDF.Controllers
 
         [Route("[action]")]
         [HttpPost]
-        public IActionResult AddText(PDF_AddText obj)
+        public IActionResult AddText(PDF_AddTextRequest obj)
         {
             using (var pdfHandler = new PDFHandler(obj.InputFile, obj.OutputFile))
             {
-                pdfHandler.AddText(new Models.PDFHandler.PDFHandler_AddText { Page = obj.Page, Text = obj.Text, XPosition = obj.XPosition, YPosition = obj.YPosition });
+                foreach (var item in obj.Details)
+                {
+                    pdfHandler.AddText(new Models.PDFHandler.PDFHandler_AddText
+                    {
+                        Page = item.Page,
+                        Text = item.Text,
+                        XPosition = item.XPosition,
+                        YPosition = item.YPosition
+                    });
+                }
             }
 
             return Ok();
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult ExtractInfo(PDF_ExtractInfoRequest obj)
+        {
+            using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
+            {
+                return Ok(pdfHandler.ExtractInfo(obj));
+            }
         }
     }
 }

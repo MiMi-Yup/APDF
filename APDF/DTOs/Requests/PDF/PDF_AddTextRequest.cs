@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace APDF.DTOs.Requests
+namespace APDF.DTOs.Requests.PDF
 {
-    public class PDF_AddText
+    public class PDF_AddTextRequest
     {
         [Required]
         public string InputFile { get; set; } = default!;
@@ -10,6 +10,15 @@ namespace APDF.DTOs.Requests
         [Required]
         public string OutputFile { get; set; } = default!;
 
+        [Required]
+        public ICollection<PDF_AddTextDetailRequest> Details { get; set; } = new List<PDF_AddTextDetailRequest>();
+
+        [Required]
+        public int PaperSize { get; set; } = 1;
+    }
+
+    public class PDF_AddTextDetailRequest
+    {
         [Required]
         public string Text { get; set; } = default!;
 

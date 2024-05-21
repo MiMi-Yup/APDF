@@ -1,10 +1,15 @@
 ﻿using APDF.Core.Interfaces;
+using APDF.DTOs.Requests.PDF;
+using APDF.DTOs.Responses.PDF;
 using APDF.Helpers;
 using APDF.Models.PDFHandler;
+using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using System.Text;
 
 namespace APDF.Core.Implements
 {
@@ -12,32 +17,42 @@ namespace APDF.Core.Implements
     {
         public string InputFile { get; private set; }
         public string OutputFile { get; private set; }
+        public bool IsReadOnly { get; private set; }
 
         private readonly PdfReader _reader;
         private readonly PdfDocument _readerDocument;
-        private readonly PdfWriter _writer;
-        private readonly PdfDocument _writerDocument;
-        private readonly Document _workingDocument;
+        private readonly PdfWriter? _writer;
+        private readonly PdfDocument? _writerDocument;
+        private readonly Document? _workingDocument;
 
-        public PDFHandler(string inputFile, string outputFile)
+        public PDFHandler(string inputFile, string outputFile = "", bool readOnly = false)
         {
             InputFile = inputFile;
-            OutputFile = outputFile;
+            IsReadOnly = readOnly;
+            if (!IsReadOnly && string.IsNullOrEmpty(outputFile))
+                throw new ArgumentNullException(nameof(outputFile));
 
-            if (!File.Exists(inputFile))
-                throw new FileNotFoundException();
+            if (!File.Exists(InputFile))
+                throw new FileNotFoundException(nameof(InputFile));
 
-            _reader = new PdfReader(inputFile);
+            _reader = new PdfReader(InputFile);
             _readerDocument = new PdfDocument(_reader);
-            _writer = new PdfWriter(outputFile);
-            _writerDocument = new PdfDocument(_writer);
-            _workingDocument = new Document(_writerDocument, _readerDocument.GetDefaultPageSize());
 
-            ClonePDF();
+            OutputFile = outputFile;
+            if (!IsReadOnly)
+            {
+                _writer = new PdfWriter(OutputFile);
+                _writerDocument = new PdfDocument(_writer);
+                _workingDocument = new Document(_writerDocument, _readerDocument.GetDefaultPageSize());
+
+                ClonePDF();
+            }
         }
 
         public void AddText(PDFHandler_AddText obj)
         {
+            if (IsReadOnly) return;
+
             if (obj == null)
                 throw new ArgumentNullException();
 
@@ -48,25 +63,63 @@ namespace APDF.Core.Implements
             Text text = new Text(obj.Text);
             text.SetFontColor(iText.Kernel.Colors.ColorConstants.BLACK);
 
+            var positionAdd = RatioScalePaperSize.ConvertFormat(obj.PaperSize,
+                _readerDocument.GetPage(obj.Page).GetPageSize(),
+                new Rectangle(UnitHelper.mm2uu(obj.XPosition), UnitHelper.mm2uu(obj.YPosition), 0, 0));
+
             var paragraph = new Paragraph(text);
-            _workingDocument.ShowTextAligned(paragraph,
-                UnitHelper.mm2uu(obj.XPosition),
-                UnitHelper.mm2uu(obj.YPosition),
+            _workingDocument?.ShowTextAligned(paragraph,
+                positionAdd.GetX(),
+                positionAdd.GetY(),
                 obj.Page,
                 obj.TextAlignment ?? TextAlignment.LEFT,
                 obj.VerticalAlignment ?? VerticalAlignment.TOP,
                 obj.RadAngle);
         }
 
+        public PDF_ExtractInfoResponse ExtractInfo(PDF_ExtractInfoRequest? areaScan)
+        {
+            int pages = _readerDocument.GetNumberOfPages();
+            StringBuilder content = new StringBuilder();
+            for (int i = 1; i <= pages; i++)
+            {
+                Rectangle? area = null;
+                if (areaScan != null)
+                {
+                    area = areaScan == null ? null : RatioScalePaperSize.ConvertFormat(areaScan.PaperSize,
+                        _readerDocument.GetPage(i).GetPageSize(),
+                        new Rectangle(UnitHelper.mm2uu(areaScan.XPosition),
+                            UnitHelper.mm2uu(areaScan.YPosition),
+                            UnitHelper.mm2uu(areaScan.Width),
+                            UnitHelper.mm2uu(areaScan.Height)));
+                }
+                var strategy = new LocationTextExtractionStrategyV2(area);
+                strategy.SetUseActualText(true);
+                content.Append(PdfTextExtractor.GetTextFromPage(_readerDocument.GetPage(i), strategy));
+            }
+            string[] extractedContent = content.ToString().Split('\n');
+
+            var result = new PDF_ExtractInfoResponse();
+            foreach (var property in result.GetType().GetProperties())
+            {
+                int index = Array.IndexOf(extractedContent, property.Name);
+                if (property.CanWrite && index != -1)
+                    property.SetValue(result, Convert.ChangeType(extractedContent[index + 1], property.PropertyType), null);
+            }
+
+            return result;
+        }
+
         #region Private
         private void ClonePDF()
         {
+            if (IsReadOnly) return;
             int numberOfPages = _readerDocument.GetNumberOfPages();
             for (var i = 1; i <= numberOfPages; i++)
             {
                 var page = _readerDocument.GetPage(i);
                 var newPage = page.CopyTo(_writerDocument);
-                _writerDocument.AddPage(newPage);
+                _writerDocument?.AddPage(newPage);
             }
         }
         #endregion
@@ -87,10 +140,13 @@ namespace APDF.Core.Implements
                 if (disposing)
                 {
                     using (_reader)
-                    using (_writer)
                     using (_readerDocument)
-                    using (_writerDocument)
-                    using (_workingDocument) { }
+                        if (!IsReadOnly)
+                        {
+                            using (_writer)
+                            using (_writerDocument)
+                            using (_workingDocument) { }
+                        }
                 }
                 disposed = true;
             }

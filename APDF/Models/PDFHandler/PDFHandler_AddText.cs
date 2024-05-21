@@ -23,6 +23,9 @@ namespace APDF.Models.PDFHandler
         [Required]
         public int Page { get; set; } = 1;
 
+        [Required]
+        public int PaperSize { get; set; } = 1;
+
         public iText.Kernel.Colors.Color? BackgroundColor { get; set; }
 
         public iText.Kernel.Colors.Color TextColor { get; set; } = iText.Kernel.Colors.ColorConstants.BLACK;
