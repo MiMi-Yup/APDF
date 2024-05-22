@@ -62,6 +62,7 @@ namespace APDF.Core.Implements
 
             Text text = new Text(obj.Text);
             text.SetFontColor(iText.Kernel.Colors.ColorConstants.BLACK);
+            text.SetFontSize(obj.FontSize);
 
             var positionAdd = RatioScalePaperSize.ConvertFormat(obj.PaperSize,
                 _readerDocument.GetPage(obj.Page).GetPageSize(),

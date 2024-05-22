@@ -27,7 +27,10 @@ namespace APDF.Controllers
                         Page = item.Page,
                         Text = item.Text,
                         XPosition = item.XPosition,
-                        YPosition = item.YPosition
+                        YPosition = item.YPosition,
+                        PaperSize = obj.PaperSize,
+                        RadAngle = item.RadAngle,
+                        FontSize = item.FontSize
                     });
                 }
             }

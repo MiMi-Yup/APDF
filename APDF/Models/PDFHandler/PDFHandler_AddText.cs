@@ -35,5 +35,7 @@ namespace APDF.Models.PDFHandler
         public VerticalAlignment? VerticalAlignment { get; set; }
 
         public float RadAngle { get; set; } = 0;
+
+        public int FontSize { get; set; } = 13;
     }
 }

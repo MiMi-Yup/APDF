@@ -38,5 +38,7 @@ namespace APDF.DTOs.Requests.PDF
         public int Page { get; set; } = 1;
 
         public float RadAngle { get; set; } = 0;
+
+        public int FontSize { get; set; } = 13;
     }
 }
