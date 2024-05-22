@@ -78,23 +78,13 @@ namespace APDF.Core.Implements
                 obj.RadAngle);
         }
 
-        public PDF_ExtractInfoResponse ExtractInfo(PDF_ExtractInfoRequest? areaScan)
+        public PDF_ExtractInfoResponse ExtractInfo()
         {
             int pages = _readerDocument.GetNumberOfPages();
             StringBuilder content = new StringBuilder();
             for (int i = 1; i <= pages; i++)
             {
-                Rectangle? area = null;
-                if (areaScan != null)
-                {
-                    area = areaScan == null ? null : RatioScalePaperSize.ConvertFormat(areaScan.PaperSize,
-                        _readerDocument.GetPage(i).GetPageSize(),
-                        new Rectangle(UnitHelper.mm2uu(areaScan.XPosition),
-                            UnitHelper.mm2uu(areaScan.YPosition),
-                            UnitHelper.mm2uu(areaScan.Width),
-                            UnitHelper.mm2uu(areaScan.Height)));
-                }
-                var strategy = new LocationTextExtractionStrategyV2(area);
+                var strategy = new LocationTextExtractionStrategyV2();
                 strategy.SetUseActualText(true);
                 content.Append(PdfTextExtractor.GetTextFromPage(_readerDocument.GetPage(i), strategy));
             }
@@ -103,9 +93,9 @@ namespace APDF.Core.Implements
             var result = new PDF_ExtractInfoResponse();
             foreach (var property in result.GetType().GetProperties())
             {
-                int index = Array.IndexOf(extractedContent, property.Name);
-                if (property.CanWrite && index != -1)
-                    property.SetValue(result, Convert.ChangeType(extractedContent[index + 1], property.PropertyType), null);
+                var found = extractedContent.FirstOrDefault(item => item.Contains(property.Name));
+                if (property.CanWrite && !string.IsNullOrEmpty(found))
+                    property.SetValue(result, Convert.ChangeType(extractedContent[Array.IndexOf(extractedContent, found) + 1], property.PropertyType), null);
             }
 
             return result;

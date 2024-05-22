@@ -44,7 +44,8 @@ namespace APDF.Controllers
         {
             using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
             {
-                return Ok(pdfHandler.ExtractInfo(obj));
+                var result = pdfHandler.ExtractInfo();
+                return string.IsNullOrEmpty(result.Format) ? NotFound() : Ok(result.Format);
             }
         }
     }
