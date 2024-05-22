@@ -7,5 +7,6 @@ namespace APDF.Core.Interfaces
     {
         void AddText(PDFHandler_AddText obj);
         PDF_ExtractInfoResponse ExtractInfo();
+        int ExtractInfoFromPaperSize();
     }
 }

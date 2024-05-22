@@ -1,5 +1,4 @@
 ﻿using APDF.Core.Interfaces;
-using APDF.DTOs.Requests.PDF;
 using APDF.DTOs.Responses.PDF;
 using APDF.Helpers;
 using APDF.Models.PDFHandler;
@@ -109,6 +108,12 @@ namespace APDF.Core.Implements
             }
 
             return result;
+        }
+
+        public int ExtractInfoFromPaperSize()
+        {
+            var pageSize = _readerDocument.GetPage(1).GetPageSize();
+            return PaperSizeHelper.GetSize(pageSize.GetWidth(), pageSize.GetHeight());
         }
 
         #region Private

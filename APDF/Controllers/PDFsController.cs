@@ -48,5 +48,16 @@ namespace APDF.Controllers
                 return string.IsNullOrEmpty(result.Format) ? NotFound() : Ok(result.Format);
             }
         }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult ExtractInfoFromPaperSize(PDF_ExtractInfoRequest obj)
+        {
+            using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
+            {
+                var result = pdfHandler.ExtractInfoFromPaperSize();
+                return result == 0 ? NotFound() : Ok($"A{result}");
+            }
+        }
     }
 }
