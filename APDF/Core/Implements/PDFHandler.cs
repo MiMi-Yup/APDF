@@ -10,6 +10,7 @@ using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace APDF.Core.Implements
 {
@@ -24,6 +25,7 @@ namespace APDF.Core.Implements
         private readonly PdfWriter? _writer;
         private readonly PdfDocument? _writerDocument;
         private readonly Document? _workingDocument;
+        private static readonly Regex regex = new Regex(@"\bA\d+\b");
 
         public PDFHandler(string inputFile, string outputFile = "", bool readOnly = false)
         {
@@ -91,11 +93,19 @@ namespace APDF.Core.Implements
             string[] extractedContent = content.ToString().Split('\n');
 
             var result = new PDF_ExtractInfoResponse();
-            foreach (var property in result.GetType().GetProperties())
+            var found = extractedContent.FirstOrDefault(item => item.Contains(nameof(result.Format)));
+            if (!string.IsNullOrEmpty(found))
             {
-                var found = extractedContent.FirstOrDefault(item => item.Contains(property.Name));
-                if (property.CanWrite && !string.IsNullOrEmpty(found))
-                    property.SetValue(result, Convert.ChangeType(extractedContent[Array.IndexOf(extractedContent, found) + 1], property.PropertyType), null);
+                int index = Array.IndexOf(extractedContent, found);
+                for (; index < extractedContent.Length; index++)
+                {
+                    Match match = regex.Match(extractedContent[index]);
+                    if (match.Success)
+                    {
+                        result.Format = match.Value;
+                        break;
+                    }
+                }
             }
 
             return result;
