@@ -56,7 +56,7 @@ namespace APDF.Controllers
             using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
             {
                 var result = pdfHandler.ExtractInfoFromPaperSize();
-                return result == 0 ? NotFound() : Ok($"A{result}");
+                return result == -1 ? NotFound() : Ok($"A{result}");
             }
         }
     }
