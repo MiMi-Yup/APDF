@@ -19,6 +19,9 @@ namespace APDF.DTOs.Requests.PDF
 
     public class PDF_AddTextDetailRequest
     {
+        /// <summary>
+        /// newline: (newline)
+        /// </summary>
         [Required]
         public string Text { get; set; } = default!;
 

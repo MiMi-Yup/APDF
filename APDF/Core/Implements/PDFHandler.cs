@@ -61,7 +61,7 @@ namespace APDF.Core.Implements
             if (numberOfPages < obj.Page)
                 throw new ArgumentException($"Page {obj.Page} exceed pages of file {numberOfPages}");
 
-            Text text = new Text(obj.Text);
+            Text text = new Text(obj.Text.Replace("(newline)", "\n"));
             text.SetFontColor(iText.Kernel.Colors.ColorConstants.BLACK);
             text.SetFontSize(obj.FontSize);
 

@@ -5,6 +5,9 @@ namespace APDF.Models.PDFHandler
 {
     public class PDFHandler_AddText
     {
+        /// <summary>
+        /// newline: (newline)
+        /// </summary>
         [Required]
         public string Text { get; set; } = default!;
 
