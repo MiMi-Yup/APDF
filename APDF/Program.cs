@@ -25,6 +25,8 @@ namespace APDF
             var checkLicense = license.Validate();
             if (checkLicense.IsValid)
             {
+                app.Logger.LogInformation(checkLicense.Message);
+
                 app.UseSwagger();
                 app.UseSwaggerUI();
 
