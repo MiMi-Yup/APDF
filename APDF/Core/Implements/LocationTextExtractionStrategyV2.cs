@@ -5,7 +5,7 @@ using iText.Kernel.Pdf.Canvas.Parser.Listener;
 
 namespace APDF.Core.Implements
 {
-    public class LocationTextExtractionStrategyV2 : LocationTextExtractionStrategy
+    internal class LocationTextExtractionStrategyV2 : LocationTextExtractionStrategy
     {
         private readonly Rectangle? overlap;
 

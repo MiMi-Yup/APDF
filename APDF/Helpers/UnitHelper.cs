@@ -1,6 +1,6 @@
 ﻿namespace APDF.Helpers
 {
-    public static class UnitHelper
+    internal static class UnitHelper
     {
         public static float uu2inch(float uu) => uu / 72f;
         public static float inch2uu(float inch) => inch * 72f;

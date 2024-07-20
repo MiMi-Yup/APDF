@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace APDF.Core.Implements
 {
-    public class PDFHandler : IPDFHandler
+    internal class PDFHandler : IPDFHandler
     {
         public string InputFile { get; private set; }
         public string OutputFile { get; private set; }

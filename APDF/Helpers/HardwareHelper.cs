@@ -6,7 +6,7 @@ using System.Text;
 namespace APDF.Helpers
 {
     [SupportedOSPlatform("windows")]
-    public class HardwareHelper
+    internal class HardwareHelper
     {
         /// <summary>
         /// Get volume serial number of drive C

@@ -2,7 +2,7 @@
 
 namespace APDF.Helpers
 {
-    public static class RatioScalePaperSize
+    internal static class RatioScalePaperSize
     {
         /// <summary>
         /// Require; Unit of rectangle is uu

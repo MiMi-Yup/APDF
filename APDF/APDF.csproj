@@ -18,5 +18,4 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.WindowsDesktop.App" />
 	</ItemGroup>
-
 </Project>
