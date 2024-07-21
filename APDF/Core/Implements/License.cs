@@ -10,11 +10,10 @@ namespace APDF.Core.Implements
     internal class License : ILicense
     {
         private readonly string PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFLRE9tEYkdoFv6q9zE1LrtnmfRA19tiHO89pOErX8kIDvGxAbVbAeIJxOiDEpjAVD1zIWTSpeIEI9oZUhTiLJA==";
-        private readonly string FILE_LICENSE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "patch.obj");
 
         public LicenseResponse Validate()
         {
-            if (!File.Exists(Path.Combine(Assembly.GetExecutingAssembly().Location,FILE_LICENSE)))
+            if (!File.Exists("patch.obj"))
             {
                 return new LicenseResponse
                 {
@@ -23,7 +22,7 @@ namespace APDF.Core.Implements
                 };
             }
 
-            using (var stream = new FileStream(FILE_LICENSE, FileMode.Open, FileAccess.Read, FileShare.Read, 4096))
+            using (var stream = new FileStream("patch.obj", FileMode.Open, FileAccess.Read, FileShare.Read, 4096))
             {
                 var license = Standard.Licensing.License.Load(stream);
 
