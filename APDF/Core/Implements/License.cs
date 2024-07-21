@@ -10,38 +10,20 @@ namespace APDF.Core.Implements
     internal class License : ILicense
     {
         private readonly string PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFLRE9tEYkdoFv6q9zE1LrtnmfRA19tiHO89pOErX8kIDvGxAbVbAeIJxOiDEpjAVD1zIWTSpeIEI9oZUhTiLJA==";
+        private readonly string FILE_LICENSE = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "patch.obj");
 
         public LicenseResponse Validate()
         {
-            string? file = Environment.GetEnvironmentVariable("APDF.License", EnvironmentVariableTarget.User);
-            if (string.IsNullOrEmpty(file) || !File.Exists(file))
+            if (!File.Exists(Path.Combine(Assembly.GetExecutingAssembly().Location,FILE_LICENSE)))
             {
-                var trial = Environment.GetEnvironmentVariable("Microsoft", EnvironmentVariableTarget.User);
-                if (string.IsNullOrEmpty(trial))
+                return new LicenseResponse
                 {
-                    trial = DateTime.Now.ToString();
-                    Environment.SetEnvironmentVariable("Microsoft", trial, EnvironmentVariableTarget.User);
-                }
-
-                if ((DateTime.TryParse(trial, out DateTime date) && DateTime.Now.AddDays(30) > date))
-                {
-                    return new LicenseResponse
-                    {
-                        IsValid = true,
-                        Message = "License: Trial"
-                    };
-                }
-                else
-                {
-                    return new LicenseResponse
-                    {
-                        IsValid = false,
-                        Message = "Not found license. Please set license path in environment"
-                    };
-                }
+                    IsValid = false,
+                    Message = "Not found license. Please set license path in environment"
+                };
             }
 
-            using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 4096))
+            using (var stream = new FileStream(FILE_LICENSE, FileMode.Open, FileAccess.Read, FileShare.Read, 4096))
             {
                 var license = Standard.Licensing.License.Load(stream);
 
@@ -51,7 +33,7 @@ namespace APDF.Core.Implements
 
                 var validationFailures = license.Validate()
                                 .ExpirationDate(systemDateTime: DateTime.Now)
-                                .When(lic => lic.Type == LicenseType.Trial)
+                                .When(lic => lic.Type == LicenseType.Standard)
                                 .And()
                                 .Signature(PUBLIC_KEY)
                                 .AssertValidLicense();

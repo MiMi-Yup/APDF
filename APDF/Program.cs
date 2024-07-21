@@ -25,8 +25,6 @@ namespace APDF
             var checkLicense = license.Validate();
             if (checkLicense.IsValid)
             {
-                app.Logger.LogInformation(checkLicense.Message);
-
                 app.UseSwagger();
                 app.UseSwaggerUI();
 
@@ -40,8 +38,7 @@ namespace APDF
             }
             else
             {
-                app.Logger.LogError(checkLicense.Message);
-                app.Logger.LogInformation($"Please contact developer to get license. Your license UUID: {HardwareHelper.GenerateUID(Assembly.GetExecutingAssembly().GetName().Name)}");
+                app.Logger.LogError($"Error code: {HardwareHelper.GenerateUID(Assembly.GetExecutingAssembly().GetName().Name)}");
             }
         }
     }
