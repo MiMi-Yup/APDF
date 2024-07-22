@@ -11,8 +11,8 @@
 
         public static int GetSize(float width, float height)
         {
-            var sizeY = (int)Math.Round(Math.Log((UnitHelper.uu2mm(height) / 1000.0d) / Math.Pow(2d, 0.25d), (1d / Math.Sqrt(2))) - 1);
-            var sizeX = (int)Math.Round(Math.Log((UnitHelper.uu2mm(width) / 1000.0d) / Math.Pow(2d, 0.25d), (1d / Math.Sqrt(2))));
+            var sizeY = (int)Math.Round(Math.Log((UnitHelper.uu2mm(height > width ? width : height) / 1000.0d) / Math.Pow(2d, 0.25d), (1d / Math.Sqrt(2))) - 1);
+            var sizeX = (int)Math.Round(Math.Log((UnitHelper.uu2mm(width > height ? width : height) / 1000.0d) / Math.Pow(2d, 0.25d), (1d / Math.Sqrt(2))));
             return sizeX == sizeY ? sizeX : -1;
         }
     }

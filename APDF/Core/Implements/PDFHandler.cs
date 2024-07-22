@@ -128,7 +128,7 @@ namespace APDF.Core.Implements
                 _writerDocument?.AddPage(newPage);
             }
         }
-        #endregion
+        #endregion  
 
         #region Dispose
         private bool disposed = false;
