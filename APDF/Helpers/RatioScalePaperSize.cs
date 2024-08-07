@@ -8,36 +8,23 @@ namespace APDF.Helpers
         /// Require; Unit of rectangle is uu
         /// </summary>
         /// <param name="fromSize"></param>
-        /// <param name="toSize"></param>
-        /// <param name="rectangle"></param>
-        /// <returns></returns>
-        public static Rectangle ConvertFormat(int fromSize, int toSize, Rectangle rectangle)
-        {
-            var ratioX = PaperSizeHelper.GetHeight(toSize) / PaperSizeHelper.GetHeight(fromSize);
-            var ratioY = PaperSizeHelper.GetWidth(toSize) / PaperSizeHelper.GetWidth(fromSize);
-
-            return new Rectangle(rectangle.GetX() * ((float)ratioX),
-                rectangle.GetY() * ((float)ratioY),
-                rectangle.GetWidth() * ((float)ratioX),
-                rectangle.GetHeight() * ((float)ratioY));
-        }
-
-        /// <summary>
-        /// Require; Unit of rectangle is uu
-        /// </summary>
-        /// <param name="fromSize"></param>
         /// <param name="toRectangleSize"></param>
         /// <param name="fromRectangle"></param>
         /// <returns></returns>
-        public static Rectangle ConvertFormat(int fromSize, Rectangle toRectangleSize, Rectangle fromRectangle)
+        public static (Point addPoint, float offsetRadAngle) ConvertFormat(int fromSize, Rectangle toRectangleSize, Point fromRectangle)
         {
-            var ratioX = toRectangleSize.GetWidth() / PaperSizeHelper.GetWidth(fromSize);
-            var ratioY = toRectangleSize.GetHeight() / PaperSizeHelper.GetHeight(fromSize);
+            float toWidth = toRectangleSize.GetWidth(), toHeight = toRectangleSize.GetHeight();
+            double fromWidth = PaperSizeHelper.GetWidth(fromSize), fromHeight = PaperSizeHelper.GetHeight(fromSize);
 
-            return new Rectangle(fromRectangle.GetX() * ((float)ratioX),
-                fromRectangle.GetY() * ((float)ratioY),
-                fromRectangle.GetWidth() * ((float)ratioX),
-                fromRectangle.GetHeight() * ((float)ratioY));
+            bool swap = toWidth < toHeight;
+
+            var ratioX = (swap ? toHeight : toWidth) / fromWidth;
+            var ratioY = (swap ? toWidth : toHeight) / fromHeight;
+
+            if (swap)
+                return (new Point((fromHeight - fromRectangle.GetY()) * ((float)ratioX), fromRectangle.GetX() * ((float)ratioY)), (float)Math.PI / 2);
+            else
+                return (new Point(fromRectangle.GetX() * ((float)ratioX), fromRectangle.GetY() * ((float)ratioY)), 0f);
         }
     }
 }

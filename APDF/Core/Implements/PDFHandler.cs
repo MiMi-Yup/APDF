@@ -65,18 +65,18 @@ namespace APDF.Core.Implements
             text.SetFontColor(iText.Kernel.Colors.ColorConstants.BLACK);
             text.SetFontSize(obj.FontSize);
 
-            var positionAdd = RatioScalePaperSize.ConvertFormat(obj.PaperSize,
+            var result = RatioScalePaperSize.ConvertFormat(obj.PaperSize,
                 _readerDocument.GetPage(obj.Page).GetPageSize(),
-                new Rectangle(UnitHelper.mm2uu(obj.XPosition), UnitHelper.mm2uu(obj.YPosition), 0, 0));
+                new Point(UnitHelper.mm2uu(obj.XPosition), UnitHelper.mm2uu(obj.YPosition)));
 
             var paragraph = new Paragraph(text);
             _workingDocument?.ShowTextAligned(paragraph,
-                positionAdd.GetX(),
-                positionAdd.GetY(),
+                (float)result.addPoint.GetX(),
+                (float)result.addPoint.GetY(),
                 obj.Page,
                 obj.TextAlignment ?? TextAlignment.LEFT,
                 obj.VerticalAlignment ?? VerticalAlignment.TOP,
-                obj.RadAngle);
+                obj.RadAngle + result.offsetRadAngle);
         }
 
         public PDF_ExtractInfoResponse ExtractInfo()
