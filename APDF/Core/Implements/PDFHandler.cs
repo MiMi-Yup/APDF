@@ -8,6 +8,7 @@ using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -24,7 +25,7 @@ namespace APDF.Core.Implements
         private readonly PdfWriter? _writer;
         private readonly PdfDocument? _writerDocument;
         private readonly Document? _workingDocument;
-        private static readonly Regex regex = new Regex(@"\bA\d+\b");
+        private static readonly Regex regex = new Regex(@"\bA\d{1}\b");
 
         public PDFHandler(string inputFile, string outputFile = "", bool readOnly = false)
         {
@@ -78,6 +79,8 @@ namespace APDF.Core.Implements
                 obj.VerticalAlignment ?? VerticalAlignment.TOP,
                 obj.RadAngle + result.offsetRadAngle);
         }
+
+        public string GetProducer { get => _readerDocument.GetDocumentInfo().GetProducer(); }
 
         public PDF_ExtractInfoResponse ExtractInfo()
         {
@@ -156,6 +159,98 @@ namespace APDF.Core.Implements
                 }
                 disposed = true;
             }
+        }
+
+        public PDF_ReadPOResponse ReadPO()
+        {
+            int pages = _readerDocument.GetNumberOfPages();
+            StringBuilder content = new StringBuilder();
+            for (int i = 1; i <= pages; i++)
+            {
+                var strategy = new LocationTextExtractionStrategyV2();
+                strategy.SetUseActualText(true);
+                content.Append(PdfTextExtractor.GetTextFromPage(_readerDocument.GetPage(i), strategy));
+            }
+            string[] extractedContent = content.ToString().Split('\n');
+            List<(int startIndex, int endIndex)> skipLines = new List<(int startIndex, int endIndex)>();
+            int startIndex = -1, endIndex = -1;
+            for (int index = 0; index < extractedContent.Length; index++)
+            {
+                if (extractedContent[index].Contains("<Send_mail>", StringComparison.InvariantCultureIgnoreCase))
+                    startIndex = index;
+                else if (extractedContent[index].Equals(".", StringComparison.InvariantCultureIgnoreCase))
+                    endIndex = index + 1;
+
+                if (startIndex != -1 && endIndex != -1)
+                {
+                    skipLines.Add((startIndex > endIndex ? endIndex : startIndex, endIndex > startIndex ? endIndex : startIndex));
+                    startIndex = -1;
+                    endIndex = -1;
+                }
+            }
+
+            List<string> contentLines = new List<string>();
+
+            foreach (var segment in skipLines)
+            {
+                contentLines.AddRange(extractedContent.Skip(segment.startIndex).Take(segment.endIndex - segment.startIndex));
+            }
+
+            string[] contentArray = contentLines.ToArray();
+            List<(int startIndex, int endIndex)> segments = new List<(int startIndex, int endIndex)>();
+            for (int index = 0; index < contentArray.Length; index++)
+            {
+                if (contentArray[index].Contains("JOB/CC", StringComparison.InvariantCultureIgnoreCase) && startIndex == -1)
+                    startIndex = index;
+                else if (contentArray[index].Contains("UNIT WEIGHT", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    endIndex = index - 1;
+                }
+
+                if (startIndex != -1 && endIndex != -1)
+                {
+                    segments.Add((startIndex > endIndex ? endIndex : startIndex, endIndex > startIndex ? endIndex : startIndex));
+                    startIndex = -1;
+                    endIndex = -1;
+                }
+            }
+            if (startIndex > -1 || endIndex > -1)
+                segments.Add((startIndex > endIndex ? startIndex : endIndex, contentArray.Length - 1));
+
+            var result = new List<PDF_ReadPO>();
+            CultureInfo enUSCulture = CultureInfo.GetCultureInfo("en-US");
+            foreach (var segment in segments)
+            {
+                var info = contentArray[segment.startIndex + 1].Split(" ");
+                var revCC = contentArray[segment.startIndex + 2].Split(" ");
+
+                var colorCode = string.Empty;
+                for (int index = segment.startIndex; index < segment.endIndex; index++)
+                {
+                    if (contentArray[index].Contains("Cycle-RAL", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        colorCode = contentArray[index].Split(":").Last().Trim();
+                        if (!colorCode.EndsWith("\""))
+                            colorCode += contentArray[index + 1].Trim();
+                        colorCode = colorCode.Replace("\"", string.Empty).Trim();
+                        break;
+                    }
+                }
+
+                result.Add(new PDF_ReadPO
+                {
+                    Job = contentArray[segment.startIndex].Split(":").Last().Trim(),
+                    NO = int.Parse(info[0]),
+                    CodeDWG = info[1],
+                    UOM = info[info.Length - 2],
+                    Quantity = double.Parse(info[info.Length - 3], enUSCulture),
+                    Revise = revCC[0],
+                    CC = revCC.Length == 2 ? Regex.IsMatch(revCC[1], @"^[a-zA-Z].*\d$") ? revCC[1].Trim() : "INVALID" : null,
+                    ColorCode = string.IsNullOrEmpty(colorCode) ? null : colorCode
+                });
+            }
+
+            return new PDF_ReadPOResponse { Informations = result.ToArray() };
         }
 
         ~PDFHandler()

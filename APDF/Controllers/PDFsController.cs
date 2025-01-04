@@ -59,5 +59,16 @@ namespace APDF.Controllers
                 return result == -1 ? NotFound() : Ok($"A{result}");
             }
         }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult ReadPO(PDF_ReadPORequest obj)
+        {
+            using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
+            {
+                var result = pdfHandler.ReadPO();
+                return Ok(result);
+            }
+        }
     }
 }
