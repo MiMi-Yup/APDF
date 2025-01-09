@@ -29,6 +29,7 @@ namespace APDF.Controllers
                         XPosition = item.XPosition,
                         YPosition = item.YPosition,
                         PaperSize = obj.PaperSize,
+                        ManualPaperSize = obj.ManualPaperSize,
                         RadAngle = item.RadAngle,
                         FontSize = item.FontSize
                     });
@@ -66,7 +67,7 @@ namespace APDF.Controllers
         {
             using (var pdfHandler = new PDFHandler(obj.FilePath, readOnly: true))
             {
-                var result = pdfHandler.ReadPO();
+                var result = pdfHandler.ReadPO(obj.NOs);
                 return Ok(result);
             }
         }

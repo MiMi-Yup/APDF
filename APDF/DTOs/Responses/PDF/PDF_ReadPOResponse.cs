@@ -2,7 +2,7 @@
 {
     public class PDF_ReadPOResponse
     {
-        public PDF_ReadPO[] Informations { get; set; }
+        public IDictionary<int, PDF_ReadPO> Informations { get; set; }
     }
 
     public class PDF_ReadPO

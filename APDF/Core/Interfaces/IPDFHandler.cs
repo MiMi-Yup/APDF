@@ -11,7 +11,7 @@ namespace APDF.Core.Interfaces
 
         int ExtractInfoFromPaperSize();
 
-        PDF_ReadPOResponse ReadPO();
+        PDF_ReadPOResponse ReadPO(int[] nos);
 
         string GetProducer { get; }
     }

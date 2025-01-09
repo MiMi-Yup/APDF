@@ -15,6 +15,8 @@ namespace APDF.DTOs.Requests.PDF
 
         [Required]
         public int PaperSize { get; set; } = 1;
+
+        public int? ManualPaperSize { get; set; }
     }
 
     public class PDF_AddTextDetailRequest

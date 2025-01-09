@@ -8,6 +8,7 @@ using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -67,7 +68,9 @@ namespace APDF.Core.Implements
             text.SetFontSize(obj.FontSize);
 
             var result = RatioScalePaperSize.ConvertFormat(obj.PaperSize,
-                _readerDocument.GetPage(obj.Page).GetPageSize(),
+                obj.ManualPaperSize == null 
+                    ? _readerDocument.GetPage(obj.Page).GetPageSize() 
+                    : new Rectangle((float)PaperSizeHelper.GetWidth(obj.ManualPaperSize.Value), (float)PaperSizeHelper.GetHeight(obj.ManualPaperSize.Value)),
                 new Point(UnitHelper.mm2uu(obj.XPosition), UnitHelper.mm2uu(obj.YPosition)));
 
             var paragraph = new Paragraph(text);
@@ -161,7 +164,7 @@ namespace APDF.Core.Implements
             }
         }
 
-        public PDF_ReadPOResponse ReadPO()
+        public PDF_ReadPOResponse ReadPO(int[] nos)
         {
             int pages = _readerDocument.GetNumberOfPages();
             StringBuilder content = new StringBuilder();
@@ -250,7 +253,13 @@ namespace APDF.Core.Implements
                 });
             }
 
-            return new PDF_ReadPOResponse { Informations = result.ToArray() };
+            IDictionary<int, PDF_ReadPO> results = new Dictionary<int, PDF_ReadPO>();
+            var resultMap = result.ToFrozenDictionary(item => item.NO, item => item);
+            foreach (var no in nos.ToHashSet())
+                if (resultMap.ContainsKey(no))
+                    results.Add(no, resultMap[no]);
+
+            return new PDF_ReadPOResponse { Informations = results };
         }
 
         ~PDFHandler()
