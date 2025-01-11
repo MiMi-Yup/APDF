@@ -228,7 +228,7 @@ namespace APDF.Core.Implements
                 var revCC = contentArray[segment.startIndex + 2].Split(" ");
 
                 var colorCode = string.Empty;
-                for (int index = segment.startIndex; index < segment.endIndex; index++)
+                for (int index = segment.startIndex; index <= segment.endIndex; index++)
                 {
                     if (contentArray[index].Contains("Cycle-RAL", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -248,7 +248,7 @@ namespace APDF.Core.Implements
                     UOM = info[info.Length - 2],
                     Quantity = double.Parse(info[info.Length - 3], enUSCulture),
                     Revise = revCC[0],
-                    CC = revCC.Length == 2 ? Regex.IsMatch(revCC[1], @"^[a-zA-Z].*\d$") ? revCC[1].Trim() : "INVALID" : null,
+                    CC = revCC.Length >= 2 ? revCC.Skip(1).FirstOrDefault(item => Regex.IsMatch(item.Trim(), @"^[a-zA-Z].*\d$"))?.Trim() ?? "INVALID" : null,
                     ColorCode = string.IsNullOrEmpty(colorCode) ? null : colorCode
                 });
             }

@@ -23,12 +23,12 @@ namespace APDF
 
             var license = app.Services.GetRequiredService<ILicense>();
             var checkLicense = license.Validate();
-            if (checkLicense.IsValid)
+            if (checkLicense.IsValid || true)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
 
-                // app.UseHttpsRedirection();
+                app.UseHttpsRedirection();
 
                 app.UseAuthorization();
 

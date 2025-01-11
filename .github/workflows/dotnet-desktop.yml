@@ -68,7 +68,7 @@ jobs:
       run: dotnet build --configuration Release
       
     - name: Publish
-      run: dotnet publish --configuration Release --self-contained /p:PublishSingleFile=true /p:PublishTrimmed=true -o ./publish
+      run: dotnet publish --configuration Release --self-contained /p:PublishSingleFile=true /p:PublishReadyToRun=true -o ./publish
       
     - name: Zip Publish Folder
       run: Compress-Archive -Path ./publish -DestinationPath APDF.zip
