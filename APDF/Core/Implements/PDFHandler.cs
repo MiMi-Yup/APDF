@@ -201,9 +201,10 @@ namespace APDF.Core.Implements
 
             string[] contentArray = contentLines.ToArray();
             List<(int startIndex, int endIndex)> segments = new List<(int startIndex, int endIndex)>();
+            bool hasJobCC = contentArray.Any(item => item.Contains("JOB/CC", StringComparison.InvariantCultureIgnoreCase));
             for (int index = 0; index < contentArray.Length; index++)
             {
-                if (contentArray[index].Contains("JOB/CC", StringComparison.InvariantCultureIgnoreCase) && startIndex == -1)
+                if (contentArray[index].Contains(hasJobCC ? "JOB/CC" : "TRACK LABEL", StringComparison.InvariantCultureIgnoreCase) && startIndex == -1)
                     startIndex = index;
                 else if (contentArray[index].Contains("UNIT WEIGHT", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -242,7 +243,7 @@ namespace APDF.Core.Implements
 
                 result.Add(new PDF_ReadPO
                 {
-                    Job = contentArray[segment.startIndex].Split(":").Last().Trim(),
+                    Job = hasJobCC ? contentArray[segment.startIndex].Split(":").Last().Trim() : null,
                     NO = int.Parse(info[0]),
                     CodeDWG = info[1],
                     UOM = info[info.Length - 2],

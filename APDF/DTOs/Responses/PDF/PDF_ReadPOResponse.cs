@@ -11,7 +11,7 @@
 
         public string CodeDWG { get; set; }
 
-        public string Job { get; set; }
+        public string? Job { get; set; }
 
         public string UOM { get; set; }
 
