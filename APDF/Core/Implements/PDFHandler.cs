@@ -179,9 +179,11 @@ namespace APDF.Core.Implements
             int startIndex = -1, endIndex = -1;
             for (int index = 0; index < extractedContent.Length; index++)
             {
-                if (extractedContent[index].Contains("<Send_mail>", StringComparison.InvariantCultureIgnoreCase))
+                if (extractedContent[index].Contains("<Send_mail>"))
                     startIndex = index;
-                else if (extractedContent[index].Equals(".", StringComparison.InvariantCultureIgnoreCase))
+                else if (extractedContent[index].Equals("."))
+                    endIndex = index + 1;
+                else if (extractedContent[index].Contains("UOM"))
                     endIndex = index + 1;
 
                 if (startIndex != -1 && endIndex != -1)
